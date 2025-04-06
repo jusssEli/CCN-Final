@@ -15,8 +15,8 @@ def GameThread():
     
     fps = pygame.time.Clock()
     screen_size = screen_width, screen_height = 600, 400
-    rect2 = pygame.Rect(0, 0, 75, 75)
     rect1 = pygame.Rect(0, 0, 25, 25)
+    rect2 = pygame.Rect(0, 0, 75, 75)
     screen = pygame.display.set_mode(screen_size)
     pygame.display.set_caption('Welcome to CCN games')
     
