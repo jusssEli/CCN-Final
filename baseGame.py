@@ -22,7 +22,9 @@ def GameThread():
     global posx
     global posy
     initSpeed = 3
+    bucketSpeed = 10
     bucketSize = 50
+    currentScore = 0
     
     fps = pygame.time.Clock()
     
@@ -57,6 +59,7 @@ def GameThread():
                 sys.exit()
         screen.fill(background)
         
+        pygame.display.set_caption(str(currentScore))
         #position shapes
         rectBucket.center = (posx, posy)
         #draw shapes
@@ -75,37 +78,37 @@ def GameThread():
                 fallObj.remove((rect,color))
                 rect, color = makeShapes()
                 fallObj.append((rect, color))
+                currentScore += 1
             elif rect.y > screen_height:
                 pygame.quit()
                 sys.exit()
         
         if keyboard.is_pressed('a') and posx >= (bucketSize/2):
             #client_socket.send('a'.encode())  # send message
-            posx -= 10
+            posx -= bucketSpeed
             time.sleep(0.05)
         if keyboard.is_pressed('d') and posx <= screen_width-(bucketSize/2):
             #client_socket.send('d'.encode())  # send message
-            posx += 10
+            posx += bucketSpeed
             time.sleep(0.05)
         if keyboard.is_pressed('s') and not collision:
             #client_socket.send('s'.encode())  # send message
-            posy += 10
+            posy += bucketSpeed
             time.sleep(0.05)
         if keyboard.is_pressed('w') and posy >= (bucketSize/2):
             #client_socket.send('w'.encode())  # send message
-            posy -= 10
+            posy -= bucketSpeed
             time.sleep(0.05)
            
         if pygame.time.get_ticks() - starttime > 5000:
             starttime = pygame.time.get_ticks()
             rect, color = makeShapes()
             fallObj.append((rect, color))
-            pygame.display.set_caption('made new object')
 
         if pygame.time.get_ticks() - speedup > 11000:
             speedup = pygame.time.get_ticks()
             initSpeed += 0.5
-            pygame.display.set_caption('sped up falling to: ' + str(initSpeed))
+            bucketSpeed += 2
         
         pygame.display.update()
         fps.tick(60)
