@@ -52,6 +52,7 @@ def GameThread():
             time.sleep(0.1)
         pygame.display.update()
         fps.tick(60)
+    pygame.quit()
 
 t1 = threading.Thread(target=GameThread, args=[])
 t1.start()
