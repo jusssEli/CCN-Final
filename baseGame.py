@@ -19,24 +19,21 @@ def GameThread():
     global posx
     global posy
     initSpeed = 3
-    one_y = 20
     
     fps = pygame.time.Clock()
     
-    screen_size = screen_width, screen_height = 600, 1000
+    screen_size = screen_width, screen_height = 600, 800
     screen = pygame.display.set_mode(screen_size)
     pygame.display.set_caption('Welcome to CCN games')
     
     def makeShapes():
         color = random.choice(COLORS)
         x_pos = random.randint(20, screen_width - 20)
-        y_pos = 20
-        rect = pygame.Rect(0, 0, 20, 20)
-        #rect.center(x_pos, y_pos)
+        rect = pygame.Rect(x_pos, 0, 20, 20)
         return rect, color
     
     
-    for _ in range(COLORS.__len__()):
+    for n in range(COLORS.__len__()):
         rect, color = makeShapes()
         fallObj.append((rect, color))
         
@@ -88,11 +85,10 @@ def GameThread():
         for rect, color in list (fallObj):
             rect.y += initSpeed
             if rect.colliderect(rectBucket):
-                one_x = random.randint(20, screen_width - 20)
-                rect.center(one_x, one_y)
-            else:
-                one_y += initSpeed
-                rect.centery(one_y)
+                fallObj.remove((rect,color))
+            elif rect.y > screen_height:
+                pygame.quit()
+                sys.exit()
                 
             
 
@@ -104,7 +100,6 @@ def GameThread():
             
         pygame.display.update()
         fps.tick(60)
-        fall = fall - 3
     pygame.quit()
 
 t1 = threading.Thread(target=GameThread, args=[])

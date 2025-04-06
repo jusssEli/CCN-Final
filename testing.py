@@ -14,7 +14,7 @@ def GameThread():
     bucket_color = (0, 51, 204)
     object_colors = [(255, 95, 31), (77, 77, 255), (57, 255, 20)]
     
-    screen_width, screen_height = 600, 1000
+    screen_width, screen_height = 600, 800
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.display.set_caption('Catch the Falling Objects')
     
