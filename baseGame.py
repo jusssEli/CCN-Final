@@ -70,6 +70,8 @@ def GameThread():
             rect.y += initSpeed
             if rect.colliderect(rectBucket):
                 fallObj.remove((rect,color))
+                rect, color = makeShapes()
+                fallObj.append((rect, color))
             elif rect.y > screen_height:
                 pygame.quit()
                 sys.exit()
