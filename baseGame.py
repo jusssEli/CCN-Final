@@ -8,8 +8,11 @@ import random
 posx = 300
 posy = 200
 
+
 def GameThread():
     pygame.init()
+    starttime = pygame.time.get_ticks()
+    speedup = pygame.time.get_ticks()
     #initializing colors
     background = (204, 230, 255)
     shapeColor = (0, 51, 204)
@@ -93,6 +96,17 @@ def GameThread():
             posy -= 10
             time.sleep(0.05)
            
+        if pygame.time.get_ticks() - starttime > 5000:
+            starttime = pygame.time.get_ticks()
+            rect, color = makeShapes()
+            fallObj.append((rect, color))
+            pygame.display.set_caption('made new object')
+
+        if pygame.time.get_ticks() - speedup > 11000:
+            speedup = pygame.time.get_ticks()
+            initSpeed += 0.5
+            pygame.display.set_caption('sped up falling to: ' + str(initSpeed))
+        
         pygame.display.update()
         fps.tick(60)
     pygame.quit()
