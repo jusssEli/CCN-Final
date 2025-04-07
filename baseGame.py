@@ -8,7 +8,6 @@ import random
 posx = 300
 posy = 200
 
-
 def GameThread():
     pygame.init()
     starttime = pygame.time.get_ticks()
@@ -108,7 +107,6 @@ def GameThread():
             initSpeed += 0.5
             bucketSpeed += 2
 
-    
         #text options
         font = pygame.font.Font(None, 25) #none is style, sze is 36
         text = "Score: " + str(currentScore)
@@ -128,7 +126,6 @@ def GameThread():
         text_rect3 = text_surface3.get_rect(center=(69, 50))  # Position in the center of the screen
         screen.blit(text_surface3, text_rect3)
         pygame.display.flip()
-
 
         pygame.display.update()
         fps.tick(60)
