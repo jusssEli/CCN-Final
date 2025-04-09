@@ -162,7 +162,7 @@ def ServerThread():
             break
 
         print("from connected user: " + str(data))
-        if data == 'm':
+        if data == 'space':
             startGame = True
             time.sleep(0.05)
         if data == 'w' and posy >= (bucketSize/2):

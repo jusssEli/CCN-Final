@@ -5,7 +5,7 @@ import threading
 
 def client_program():
     print("trying to connect to server")
-    host = "10.22.9.89"
+    host = "10.22.32.153"
     port = 5000  # socket server port number
 
     client_socket = socket.socket()  # instantiate
@@ -16,8 +16,8 @@ def client_program():
     print("waiting for keyboard input")
     while keyboard.read_key() != 'q':
 
-        if keyboard.is_pressed('m') and not startPressed:
-            client_socket.send('m'.encode())  # send message
+        if keyboard.is_pressed('space') and not startPressed:
+            client_socket.send('space'.encode())  # send message
             startPressed = True
             time.sleep(0.1)
         if keyboard.is_pressed('a'):
