@@ -1,19 +1,25 @@
 import keyboard
 import socket
 import time
-
+import threading
 
 def client_program():
     print("trying to connect to server")
-    host = "10.34.10.44"
+    host = "10.22.32.153"
     port = 5000  # socket server port number
 
     client_socket = socket.socket()  # instantiate
     client_socket.connect((host, port))  # connect to the server
 
+    startPressed = False
+
     print("waiting for keyboard input")
     while keyboard.read_key() != 'q':
 
+        if keyboard.is_pressed('m') and not startPressed:
+            client_socket.send('m'.encode())  # send message
+            startPressed = True
+            time.sleep(0.1)
         if keyboard.is_pressed('a'):
             client_socket.send('a'.encode())  # send message
             time.sleep(0.1)
@@ -30,5 +36,4 @@ def client_program():
     client_socket.close()  # close the connection
 
 
-if __name__ == '__main__':
-    client_program()
+client_program()
