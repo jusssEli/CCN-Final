@@ -5,10 +5,10 @@ import sys
 import time
 import random
 
-posx = 300
-posy = 200
+posx = 275
+posy = 520
 bucketSpeed = 20
-bucketSize = 55
+bucketSize = 60
 screen_width = 550
 screen_height = 700
 bucket_angle = 0
@@ -34,6 +34,7 @@ def GameThread():
     global startGame
     initSpeed = 1
     currentScore = 0
+    levelCount  = 0
     fps = pygame.time.Clock()
     screen_size = screen_width, screen_height
     screen = pygame.display.set_mode(screen_size)
@@ -42,7 +43,7 @@ def GameThread():
     disk_images = [
         pygame.transform.scale(pygame.image.load('assets/whiteDisk.png').convert_alpha(), (50, 50)),
         pygame.transform.scale(pygame.image.load('assets/blueDisk.png').convert_alpha(), (50, 50)),
-        pygame.transform.scale(pygame.image.load('assets/orangeDisk.png').convert_alpha(), (50, 60))
+        pygame.transform.scale(pygame.image.load('assets/orangeDisk.png').convert_alpha(), (50, 65))
     ]
     bucket_img = pygame.image.load('assets/tron.png').convert_alpha()
     bucket_img = pygame.transform.scale(bucket_img, (bucketSize + 20, bucketSize + 20))
@@ -54,13 +55,13 @@ def GameThread():
     def makeShapes():
         img = random.choice(disk_images)
         x_pos = random.randint(20, screen_width - 20)
-        rect = pygame.Rect(x_pos, 0, 50, 50)
+        rect = pygame.Rect(x_pos, 40, 50, 50)
         return rect, img
         
     #making bucket, floor shapes
     rectBucket = pygame.Rect(0, 0, bucketSize, bucketSize)
-    rectFloor = pygame.Rect(0, 0, 450, 10)
-    rectFloor.center = (screen_width/2, screen_height-5)
+    rectFloor = pygame.Rect(0, 0, 550, 80)
+    rectFloor.center = (screen_width/2, 0)
 
     #giving shapes a color
     colorRect =  (shapeColor)
@@ -111,44 +112,37 @@ def GameThread():
             starttime = pygame.time.get_ticks()
             rect, color = makeShapes()
             fallObj.append((rect, color))
+            levelCount += 1
         elif not startGame:
             starttime = pygame.time.get_ticks()
 
         if pygame.time.get_ticks() - speedup > 10000 and startGame:
             speedup = pygame.time.get_ticks()
             initSpeed += 0.1
-            bucketSpeed += 4
+            bucketSpeed += 5
         elif not startGame:
             speedup = pygame.time.get_ticks()
 
         #text options
         font = pygame.font.Font(None, 25)
-        text = "Score: " + str(currentScore)
-        blockSpeedText = "Block Speed: " + str(initSpeed)
-        bucketSpeedText = "Bucket Speed: " + str(bucketSpeed)
-
-        text_surface = font.render(text, True, (0, 0, 0))
-        text_rect = text_surface.get_rect()
-        text_rect.midleft = (screen.get_width()-75, 20)
-        screen.blit(text_surface, text_rect)
-
-        text_surface2 = font.render(blockSpeedText, True, (0, 0, 0))
-        text_rect2 = text_surface2.get_rect(center=(60, 30))
-        screen.blit(text_surface2, text_rect2)
-
-        text_surface3 = font.render(bucketSpeedText, True, (0, 0, 0))
-        text_rect3 = text_surface3.get_rect(center=(69, 50))
-        screen.blit(text_surface3, text_rect3)
 
         # Space to start
         if not startGame:
             start_text = pygame.font.Font(None, 36).render("Press SPACE to Start", True, (0, 0, 255))
             start_rect = start_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
             screen.blit(start_text, start_rect)
-
+        
         text = "Score: " + str(currentScore)
-        blockSpeedText = "Block Speed: " + str(initSpeed)
-        bucketSpeedText = "Bucket Speed: " + str(bucketSpeed)
+        levelText = "Level: " + str(levelCount)
+
+        text_surface = font.render(text, True, (255, 255, 255))  # black color text
+        text_rect = text_surface.get_rect(center=(50, 20))  #  center of the screen
+        screen.blit(text_surface, text_rect)
+
+        text_surface2 = font.render(levelText, True, (255, 255, 255))  # black color text
+        text_rect2 = text_surface2.get_rect(center=(480, 20))  #  center of the screen
+        screen.blit(text_surface2, text_rect2)
+
         pygame.display.flip()
 
         pygame.display.update()
