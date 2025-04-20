@@ -1,39 +1,44 @@
 import keyboard
 import socket
 import time
-import threading
 
 def client_program():
-    print("trying to connect to server")
-    host = "10.12.104.23"
-    port = 5000  # socket server port number
+    print("Trying to connect to server...")
+    host = "192.168.1.164"
+    port = 5000
 
-    client_socket = socket.socket()  # instantiate
-    client_socket.connect((host, port))  # connect to the server
+    client_socket = socket.socket()
+    client_socket.connect((host, port))
+    print("Connected.")
 
     startPressed = False
 
-    print("waiting for keyboard input")
-    while keyboard.read_key() != 'q':
+    try:
+        while True:
+            keys = []
 
-        if keyboard.is_pressed('space') and not startPressed:
-            client_socket.send('space'.encode())  # send message
-            startPressed = True
-            time.sleep(0.1)
-        if keyboard.is_pressed('a'):
-            client_socket.send('a'.encode())  # send message
-            time.sleep(0.1)
-        if keyboard.is_pressed('d'):
-            client_socket.send('d'.encode())  # send message
-            time.sleep(0.1)
-        if keyboard.is_pressed('s'):
-            client_socket.send('s'.encode())  # send message
-            time.sleep(0.1)
-        if keyboard.is_pressed('w'):
-            client_socket.send('w'.encode())  # send message
-            time.sleep(0.1)
+            if keyboard.is_pressed('space') and not startPressed:
+                client_socket.send('space'.encode())
+                startPressed = True
 
-    client_socket.close()  # close the connection
+            # Collect all pressed movement keys
+            if keyboard.is_pressed('w'):
+                keys.append('w')
+            if keyboard.is_pressed('a'):
+                keys.append('a')
+            if keyboard.is_pressed('s'):
+                keys.append('s')
+            if keyboard.is_pressed('d'):
+                keys.append('d')
 
+            if keys:
+                # Send combined input like "ws" or "ad"
+                movement = ''.join(keys)
+                client_socket.send(movement.encode())
+
+            time.sleep(0.01)  # 10ms loop delay for smooth input
+
+    except KeyboardInterrupt:
+        client_socket.close()
 
 client_program()
