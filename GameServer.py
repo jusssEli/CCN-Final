@@ -7,7 +7,7 @@ import random
 
 posx = 275
 posy = 520
-bucketSpeed = 20
+bucketSpeed = 10
 bucketSize = 60
 screen_width = 550
 screen_height = 700
@@ -124,7 +124,7 @@ def GameThread():
         if pygame.time.get_ticks() - speedup > 10000 and startGame:
             speedup = pygame.time.get_ticks()
             initSpeed += 0.1
-            bucketSpeed += 5
+            bucketSpeed += 3
         elif not startGame:
             speedup = pygame.time.get_ticks()
 
