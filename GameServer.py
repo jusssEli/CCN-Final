@@ -39,7 +39,7 @@ def GameThread():
     global startGame
     initSpeed = 1
     currentScore = 0
-    levelCount  = 0
+    levelCount  = 1
     fps = pygame.time.Clock()
     screen_size = screen_width, screen_height
     screen = pygame.display.set_mode(screen_size)
