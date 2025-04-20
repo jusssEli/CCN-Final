@@ -33,18 +33,24 @@ def GameThread():
     global startGame
     initSpeed = 1
     currentScore = 0
-    
     fps = pygame.time.Clock()
-    
     screen_size = screen_width, screen_height
     screen = pygame.display.set_mode(screen_size)
     pygame.display.set_caption('Welcome to CCN games')
+    #images
+    disk_images = [
+        pygame.transform.scale(pygame.image.load('assets/whiteDisk.png').convert_alpha(), (20, 20)),
+        pygame.transform.scale(pygame.image.load('assets/blueDisk.png').convert_alpha(), (20, 20)),
+        pygame.transform.scale(pygame.image.load('assets/orangeDisk.png').convert_alpha(), (20, 20))
+    ]
+    bucket_img = pygame.image.load('assets/tron.png').convert_alpha()
+    bucket_img = pygame.transform.scale(bucket_img, (bucketSize, bucketSize))
     
     def makeShapes():
-        color = random.choice(COLORS)
+        img = random.choice(disk_images)
         x_pos = random.randint(20, screen_width - 20)
         rect = pygame.Rect(x_pos, 0, 20, 20)
-        return rect, color
+        return rect, img
         
     #making bucket, floor shapes
     rectBucket = pygame.Rect(0, 0, bucketSize, bucketSize)
@@ -67,7 +73,7 @@ def GameThread():
         #position shapes
         rectBucket.center = (posx, posy)
         #draw shapes
-        pygame.draw.rect(screen, colorRect, rectBucket)
+        screen.blit(bucket_img, rectBucket.topleft)
         pygame.draw.rect(screen, colorFloor, rectFloor)
 
         if startGame and not madeFirst:
@@ -76,8 +82,9 @@ def GameThread():
             madeFirst = True
 
         #drawing falling rect
-        for rect, color in fallObj:
-            pygame.draw.rect(screen, color, rect)
+        for rect, img in fallObj:
+            screen.blit(img, rect.topleft)
+
             
         #collision of falling objects
         for rect, color in list (fallObj):
