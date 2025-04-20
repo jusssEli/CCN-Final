@@ -11,6 +11,7 @@ bucketSpeed = 20
 bucketSize = 50
 screen_width = 450
 screen_height = 600
+bucket_angle = 0
 
 startGame = False
 
@@ -25,6 +26,7 @@ def GameThread():
     COLORS = [(255, 95, 31), (77, 77, 255), (57, 255, 20)]
     fallObj = []
     global posx
+    global bucket_angle
     global posy
     global bucketSpeed
     global bucketSize
@@ -70,10 +72,13 @@ def GameThread():
                 pygame.quit()
                 sys.exit()
         screen.fill(background)
-        #position shapes
+        #position/draw shapes
         rectBucket.center = (posx, posy)
-        #draw shapes
-        screen.blit(bucket_img, rectBucket.topleft)
+        angle = bucket_angle
+        rotated_bucket = pygame.transform.rotate(bucket_img, angle)
+        rotated_rect = rotated_bucket.get_rect(center=rectBucket.center)
+        screen.blit(rotated_bucket, rotated_rect.topleft)
+
         pygame.draw.rect(screen, colorFloor, rectFloor)
 
         if startGame and not madeFirst:
@@ -140,6 +145,7 @@ def ServerThread():
     global posx
     global posy
     global bucketSpeed
+    global bucket_angle
     global bucketSize
     global screen_width
     global screen_height
@@ -175,15 +181,19 @@ def ServerThread():
         if data == 'w' and posy >= (bucketSize/2):
             posy -= bucketSpeed
             time.sleep(0.05)
+            bucket_angle = 90
         if data == 's' and posy <= screen_height-(bucketSize/2):
             posy += bucketSpeed
             time.sleep(0.05)
+            bucket_angle = -90
         if data == 'a' and posx >= (bucketSize/2):
             posx -= bucketSpeed
             time.sleep(0.05)
+            bucket_angle = 180
         if data == 'd' and posx <= screen_width-(bucketSize/2):
             posx += bucketSpeed
             time.sleep(0.05)
+            bucket_angle = 0
     conn.close()  # close the connection
 
  
