@@ -15,10 +15,14 @@ bucket_angle = 0
 
 startGame = False
 
-def GameThread():
-    pygame.init()
+def GameThread():  
+    pygame.mixer.music.load('assets/techno.mp3')
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1)
+
     starttime = pygame.time.get_ticks()
     speedup = pygame.time.get_ticks()
+    
     #initializing colors
     background = (204, 230, 255)
     shapeColor = (0, 51, 204)
