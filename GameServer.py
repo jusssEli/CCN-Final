@@ -9,8 +9,8 @@ posx = 300
 posy = 200
 bucketSpeed = 20
 bucketSize = 55
-screen_width = 450
-screen_height = 600
+screen_width = 550
+screen_height = 700
 bucket_angle = 0
 
 startGame = False
@@ -23,7 +23,6 @@ def GameThread():
     background = (204, 230, 255)
     shapeColor = (0, 51, 204)
     floorColor = (0, 0, 0)
-    COLORS = [(255, 95, 31), (77, 77, 255), (57, 255, 20)]
     fallObj = []
     global posx
     global bucket_angle
@@ -47,7 +46,11 @@ def GameThread():
     ]
     bucket_img = pygame.image.load('assets/tron.png').convert_alpha()
     bucket_img = pygame.transform.scale(bucket_img, (bucketSize + 20, bucketSize + 20))
-    
+    bg_image = pygame.transform.scale(
+        pygame.image.load('assets/background.png'),
+        (screen_width, screen_height)
+    )
+    ##########################
     def makeShapes():
         img = random.choice(disk_images)
         x_pos = random.randint(20, screen_width - 20)
@@ -71,7 +74,8 @@ def GameThread():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-        screen.fill(background)
+        #screen.fill(background)
+        screen.blit(bg_image, (0, 0))
         #position/draw shapes
         rectBucket.center = (posx, posy)
         angle = bucket_angle

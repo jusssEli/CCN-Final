@@ -5,7 +5,7 @@ import threading
 
 def client_program():
     print("trying to connect to server")
-    host = "10.12.104.23"
+    host = "192.168.1.164"
     port = 5000  # socket server port number
 
     client_socket = socket.socket()  # instantiate
