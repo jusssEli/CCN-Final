@@ -8,7 +8,7 @@ import random
 posx = 300
 posy = 200
 bucketSpeed = 20
-bucketSize = 50
+bucketSize = 55
 screen_width = 450
 screen_height = 600
 bucket_angle = 0
@@ -41,17 +41,17 @@ def GameThread():
     pygame.display.set_caption('Welcome to CCN games')
     #images
     disk_images = [
-        pygame.transform.scale(pygame.image.load('assets/whiteDisk.png').convert_alpha(), (20, 20)),
-        pygame.transform.scale(pygame.image.load('assets/blueDisk.png').convert_alpha(), (20, 20)),
-        pygame.transform.scale(pygame.image.load('assets/orangeDisk.png').convert_alpha(), (20, 20))
+        pygame.transform.scale(pygame.image.load('assets/whiteDisk.png').convert_alpha(), (50, 50)),
+        pygame.transform.scale(pygame.image.load('assets/blueDisk.png').convert_alpha(), (50, 50)),
+        pygame.transform.scale(pygame.image.load('assets/orangeDisk.png').convert_alpha(), (50, 60))
     ]
     bucket_img = pygame.image.load('assets/tron.png').convert_alpha()
-    bucket_img = pygame.transform.scale(bucket_img, (bucketSize, bucketSize))
+    bucket_img = pygame.transform.scale(bucket_img, (bucketSize + 20, bucketSize + 20))
     
     def makeShapes():
         img = random.choice(disk_images)
         x_pos = random.randint(20, screen_width - 20)
-        rect = pygame.Rect(x_pos, 0, 20, 20)
+        rect = pygame.Rect(x_pos, 0, 50, 50)
         return rect, img
         
     #making bucket, floor shapes
@@ -112,8 +112,8 @@ def GameThread():
 
         if pygame.time.get_ticks() - speedup > 10000 and startGame:
             speedup = pygame.time.get_ticks()
-            initSpeed += 0.2
-            bucketSpeed += 5
+            initSpeed += 0.1
+            bucketSpeed += 4
         elif not startGame:
             speedup = pygame.time.get_ticks()
 
