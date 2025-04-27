@@ -1,10 +1,12 @@
-import threading 
+import threading
 import pygame
 import socket
 import sys
 import time
 import random
+import os
 
+# --- Globals ---
 posx = 275
 posy = 520
 bucketSpeed = 10
@@ -15,36 +17,83 @@ bucket_angle = 0
 
 startGame = False
 
-def GameThread():  
+MENU_MAIN = "main"
+MENU_SETTINGS = "settings"
+MENU_PLAY = "play"
+
+currentMenu = MENU_MAIN
+
+def load_high_score():
+    if os.path.exists('highscore.txt'):
+        with open('highscore.txt', 'r') as file:
+            try:
+                return int(file.read())
+            except ValueError:
+                return 0
+    else:
+        return 0
+
+def save_high_score(score):
+    with open('highscore.txt', 'w') as file:
+        file.write(str(score))
+
+class Button:
+    def __init__(self, x, y, width, height, text, base_color, hover_color, action=None):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+        self.base_color = base_color
+        self.hover_color = hover_color
+        self.current_color = list(base_color)
+        self.action = action
+        self.font = pygame.font.Font(None, 40)
+
+    def draw(self, screen):
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Animate color
+        target_color = self.hover_color if self.rect.collidepoint(mouse_pos) else self.base_color
+        for i in range(3):
+            if self.current_color[i] < target_color[i]:
+                self.current_color[i] += min(5, target_color[i] - self.current_color[i])
+            elif self.current_color[i] > target_color[i]:
+                self.current_color[i] -= min(5, self.current_color[i] - target_color[i])
+
+        pygame.draw.rect(screen, self.current_color, self.rect)
+        text_surface = self.font.render(self.text, True, (0, 0, 0))
+        screen.blit(text_surface, (self.rect.centerx - text_surface.get_width()//2,
+                                   self.rect.centery - text_surface.get_height()//2))
+
+    def check_click(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.rect.collidepoint(event.pos):
+                if self.action:
+                    self.action()
+
+def GameThread():
     pygame.init()
     pygame.mixer.music.load('assets/techno.mp3')
     pygame.mixer.music.set_volume(0.5)
     pygame.mixer.music.play(-1)
 
+    global posx, posy, bucketSpeed, bucketSize, screen_width, screen_height, startGame, currentMenu
+
     starttime = pygame.time.get_ticks()
     speedup = pygame.time.get_ticks()
-    
-    #initializing colors
     background = (204, 230, 255)
-    shapeColor = (0, 51, 204)
-    floorColor = (0, 0, 0)
     fallObj = []
-    global posx
-    global bucket_angle
-    global posy
-    global bucketSpeed
-    global bucketSize
-    global screen_width
-    global screen_height
-    global startGame
     initSpeed = 1
     currentScore = 0
-    levelCount  = 1
+    highScore = load_high_score()
+    high_score_pulse = False
+    pulse_alpha = 0
+    pulse_direction = 1
+    pulse_start_time = 0
+    levelCount = 1
     fps = pygame.time.Clock()
     screen_size = screen_width, screen_height
     screen = pygame.display.set_mode(screen_size)
-    pygame.display.set_caption('Welcome to CCN games')
-    #images
+    pygame.display.set_caption('Welcome to CCN Games')
+
     disk_images = [
         pygame.transform.scale(pygame.image.load('assets/whiteDisk.png').convert_alpha(), (50, 50)),
         pygame.transform.scale(pygame.image.load('assets/blueDisk.png').convert_alpha(), (50, 50)),
@@ -52,142 +101,160 @@ def GameThread():
     ]
     bucket_img = pygame.image.load('assets/tron.png').convert_alpha()
     bucket_img = pygame.transform.scale(bucket_img, (bucketSize + 20, bucketSize + 20))
-    bg_image = pygame.transform.scale(
-        pygame.image.load('assets/background.png'),
-        (screen_width, screen_height)
-    )
-    ##########################
-    def makeShapes():
-        img = random.choice(disk_images)
-        x_pos = random.randint(20, screen_width - 20)
-        rect = pygame.Rect(x_pos, 40, 50, 50)
-        return rect, img
-        
-    #making bucket, floor shapes
+    bg_image = pygame.transform.scale(pygame.image.load('assets/background.png'), (screen_width, screen_height))
+
     rectBucket = pygame.Rect(0, 0, bucketSize, bucketSize)
     rectFloor = pygame.Rect(0, 0, 550, 80)
     rectFloor.center = (screen_width/2, 0)
 
-    #giving shapes a color
-    colorRect =  (shapeColor)
-    colorFloor = (floorColor)
-
     madeFirst = False
+    font = pygame.font.Font(None, 36)
 
-    #while loop for the game
+    #Button
+    play_button = Button(screen_width//2 - 75, 300, 150, 50, "Play", (30, 60, 120), (80, 120, 220), lambda: set_menu(MENU_PLAY))
+    settings_button = Button(screen_width//2 - 75, 370, 150, 50, "Settings", (30, 60, 120), (80, 120, 220), lambda: set_menu(MENU_SETTINGS))
+    back_button = Button(20, 20, 100, 40, "Back", (30, 60, 120), (80, 120, 220), lambda: set_menu(MENU_MAIN))
+    volume_up_button = Button(screen_width//2 - 100, 300, 200, 50, "Volume +", (30, 60, 120), (80, 120, 220), lambda: change_volume(0.1))
+    volume_down_button = Button(screen_width//2 - 100, 370, 200, 50, "Volume -", (30, 60, 120), (80, 120, 220), lambda: change_volume(-0.1))
+
+    def set_menu(menu_name):
+        global currentMenu, startGame
+        currentMenu = menu_name
+        if menu_name == MENU_PLAY:
+            startGame = True
+
+    def change_volume(amount):
+        new_volume = pygame.mixer.music.get_volume() + amount
+        new_volume = max(0.0, min(1.0, new_volume))
+        pygame.mixer.music.set_volume(new_volume)
+
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-        #screen.fill(background)
+            if currentMenu == MENU_MAIN:
+                play_button.check_click(event)
+                settings_button.check_click(event)
+            elif currentMenu == MENU_SETTINGS:
+                back_button.check_click(event)
+                volume_up_button.check_click(event)
+                volume_down_button.check_click(event)
+
         screen.blit(bg_image, (0, 0))
-        #position/draw shapes
-        rectBucket.center = (posx, posy)
-        angle = bucket_angle
-        rotated_bucket = pygame.transform.rotate(bucket_img, angle)
-        rotated_rect = rotated_bucket.get_rect(center=rectBucket.center)
-        screen.blit(rotated_bucket, rotated_rect.topleft)
 
-        pygame.draw.rect(screen, colorFloor, rectFloor)
+        if currentMenu == MENU_MAIN:
+            title = font.render("Welcome to CCN Games", True, (255, 255, 255))
+            screen.blit(title, (screen_width//2 - title.get_width()//2, 200))
+            play_button.draw(screen)
+            settings_button.draw(screen)
 
-        if startGame and not madeFirst:
-            rect, color = makeShapes()
-            fallObj.append((rect, color))
-            madeFirst = True
+        elif currentMenu == MENU_SETTINGS:
+            settings_title = font.render("Settings", True, (255, 255, 255))
+            screen.blit(settings_title, (screen_width//2 - settings_title.get_width()//2, 200))
+            volume_up_button.draw(screen)
+            volume_down_button.draw(screen)
+            back_button.draw(screen)
 
-        #drawing falling rect
-        for rect, img in fallObj:
-            screen.blit(img, rect.topleft)
+        elif currentMenu == MENU_PLAY:
+            rectBucket.center = (posx, posy)
+            rotated_bucket = pygame.transform.rotate(bucket_img, bucket_angle)
+            rotated_rect = rotated_bucket.get_rect(center=rectBucket.center)
+            screen.blit(rotated_bucket, rotated_rect)
+            pygame.draw.rect(screen, (0, 0, 0), rectFloor)
 
-            
-        #collision of falling objects
-        for rect, color in list (fallObj):
-            rect.y += initSpeed
-            if rect.colliderect(rectBucket):
-                fallObj.remove((rect,color))
-                rect, color = makeShapes()
+            if startGame and not madeFirst:
+                rect, color = makeShapes(disk_images)
                 fallObj.append((rect, color))
-                currentScore += 1
-            elif rect.y > screen_height:
-                pygame.quit()
-                sys.exit()
-           
-        if pygame.time.get_ticks() - starttime > 15000 and startGame:
-            starttime = pygame.time.get_ticks()
-            rect, color = makeShapes()
-            fallObj.append((rect, color))
-            levelCount += 1
-        elif not startGame:
-            starttime = pygame.time.get_ticks()
+                madeFirst = True
 
-        if pygame.time.get_ticks() - speedup > 10000 and startGame:
-            speedup = pygame.time.get_ticks()
-            initSpeed += 0.1
-            bucketSpeed += 3
-        elif not startGame:
-            speedup = pygame.time.get_ticks()
+            for rect, img in fallObj:
+                screen.blit(img, rect.topleft)
 
-        #text options
-        font = pygame.font.Font(None, 25)
+            for rect, color in list(fallObj):
+                rect.y += initSpeed
+                if rect.colliderect(rectBucket):
+                    fallObj.remove((rect, color))
+                    rect, color = makeShapes(disk_images)
+                    fallObj.append((rect, color))
+                    currentScore += 1
+                    if currentScore > highScore:
+                        highScore = currentScore
+                        save_high_score(highScore)
+                        high_score_pulse = True
+                        pulse_start_time = pygame.time.get_ticks()
+                elif rect.y > screen_height:
+                    pygame.quit()
+                    sys.exit()
 
-        # Space to start
-        if not startGame:
-            start_text = pygame.font.Font(None, 36).render("Press SPACE to Start", True, (0, 0, 255))
-            start_rect = start_text.get_rect(center=(screen.get_width() // 2, screen.get_height() // 2))
-            screen.blit(start_text, start_rect)
-        
-        text = "Score: " + str(currentScore)
-        levelText = "Level: " + str(levelCount)
+            if pygame.time.get_ticks() - starttime > 15000 and startGame:
+                starttime = pygame.time.get_ticks()
+                rect, color = makeShapes(disk_images)
+                fallObj.append((rect, color))
+                levelCount += 1
 
-        text_surface = font.render(text, True, (255, 255, 255))  # black color text
-        text_rect = text_surface.get_rect(center=(50, 20))  #  center of the screen
-        screen.blit(text_surface, text_rect)
+            if pygame.time.get_ticks() - speedup > 10000 and startGame:
+                speedup = pygame.time.get_ticks()
+                initSpeed += 0.1
+                bucketSpeed += 3
 
-        text_surface2 = font.render(levelText, True, (255, 255, 255))  # black color text
-        text_rect2 = text_surface2.get_rect(center=(480, 20))  #  center of the screen
-        screen.blit(text_surface2, text_rect2)
+            # HUD
+            small_font = pygame.font.Font(None, 25)
+            text_surface = small_font.render(f"Score: {currentScore}", True, (255, 255, 255))
+            level_surface = small_font.render(f"Level: {levelCount}", True, (255, 255, 255))
+
+            if high_score_pulse:
+                if pygame.time.get_ticks() - pulse_start_time >= 2000:
+                    high_score_pulse = False
+                else:
+                    pulse_alpha += pulse_direction * 5
+                    if pulse_alpha >= 255:
+                        pulse_alpha = 255
+                        pulse_direction = -1
+                    elif pulse_alpha <= 100:
+                        pulse_alpha = 100
+                        pulse_direction = 1
+                purple_color = (pulse_alpha, 0, pulse_alpha)
+                high_score_surface = small_font.render(f"High Score: {highScore}", True, purple_color)
+            else:
+                high_score_surface = small_font.render(f"High Score: {highScore}", True, (255, 255, 0))
+
+            screen.blit(text_surface, (50, 20))
+            screen.blit(level_surface, (480, 20))
+            screen.blit(high_score_surface, (screen_width//2 - high_score_surface.get_width()//2, 20))
 
         pygame.display.flip()
-
-        pygame.display.update()
         fps.tick(60)
-    pygame.quit()
+
+def makeShapes(disk_images):
+    img = random.choice(disk_images)
+    x_pos = random.randint(20, screen_width - 20)
+    rect = pygame.Rect(x_pos, 40, 50, 50)
+    return rect, img
 
 def ServerThread():
-    global posx
-    global posy
-    global bucketSpeed
-    global bucket_angle
-    global bucketSize
-    global screen_width
-    global screen_height
-    global startGame
-    #get the hostname
+    global posx, posy, bucketSpeed, bucket_angle, bucketSize, screen_width, screen_height, startGame
     host = socket.gethostbyname(socket.gethostname())
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
     host = s.getsockname()[0]
     s.close()
     print(host)
-    port = 5000  # initiate port no above 1024
+    port = 5000
 
-    server_socket = socket.socket() # get instance
-    # look closely. The bind() function takes tuple as argument
-    server_socket.bind((host, port))  # bind host address and port together
+    server_socket = socket.socket()
+    server_socket.bind((host, port))
     print("Server enabled...")
-     # configure how many client the server can listen simultaneously
     server_socket.listen(2)
-    conn, address = server_socket.accept()  # accept new connection
-    print("Connection from: " + str(address))   
+    conn, address = server_socket.accept()
+    print("Connection from: " + str(address))
+
     while True:
-        # receive data stream. it won't accept data packet greater than 1024 bytes
         data = conn.recv(1024).decode()
         if not data:
-            # if data is not received break
             break
-
         print("from connected user: " + str(data))
+
         if data == 'space':
             startGame = True
             time.sleep(0.05)
@@ -207,10 +274,9 @@ def ServerThread():
             posx += bucketSpeed
             time.sleep(0.05)
             bucket_angle = 0
-    conn.close()  # close the connection
+    conn.close()
 
- 
-t1 = threading.Thread(target=GameThread, args=[])
-t2 = threading.Thread(target=ServerThread, args=[])
+t1 = threading.Thread(target=GameThread)
+t2 = threading.Thread(target=ServerThread)
 t1.start()
 t2.start()
