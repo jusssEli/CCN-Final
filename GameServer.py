@@ -8,10 +8,10 @@ import os
 
 posx1, posy1 = 275, 520
 posx2, posy2 = 275, 100
-bucketSpeed = 10
+bucketSpeed = 5
 bucketSize = 60
-screen_width = 550
-screen_height = 700
+screen_width = 650
+screen_height = 800
 bucket_angle1 = 0
 bucket_angle2 = 0
 
@@ -134,12 +134,12 @@ def GameThread():
     font = pygame.font.Font(None, 36)
     small_font = pygame.font.Font(None, 25)
 
-    one_player_button = Button(screen_width//2 - 75, 300, 150, 50, "One Player", (30, 60, 120), (80, 120, 220), lambda: start_game(1))
-    two_player_button = Button(screen_width//2 - 75, 370, 150, 50, "Two Players", (30, 60, 120), (80, 120, 220), lambda: start_game(2))
-    settings_button = Button(screen_width//2 - 75, 440, 150, 50, "Settings", (30, 60, 120), (80, 120, 220), lambda: set_menu(MENU_SETTINGS))
+    one_player_button = Button(screen_width//2 - 75, 300, 200, 50, "One Player", (30, 60, 120), (80, 120, 220), lambda: start_game(1))
+    two_player_button = Button(screen_width//2 - 75, 370, 200, 50, "Two Players", (30, 60, 120), (80, 120, 220), lambda: start_game(2))
+    settings_button = Button(screen_width//2 - 75, 440, 200, 50, "Settings", (30, 60, 120), (80, 120, 220), lambda: set_menu(MENU_SETTINGS))
     back_button = Button(20, 20, 100, 40, "Back", (30, 60, 120), (80, 120, 220), lambda: set_menu(MENU_MAIN))
-    volume_up_button = Button(screen_width//2 - 100, 300, 200, 50, "Volume +", (30, 60, 120), (80, 120, 220), lambda: change_volume(0.1))
-    volume_down_button = Button(screen_width//2 - 100, 370, 200, 50, "Volume -", (30, 60, 120), (80, 120, 220), lambda: change_volume(-0.1))
+    volume_up_button = Button(screen_width//2 - 100, 300, 225, 50, "Volume +", (30, 60, 120), (80, 120, 220), lambda: change_volume(0.1))
+    volume_down_button = Button(screen_width//2 - 100, 370, 225, 50, "Volume -", (30, 60, 120), (80, 120, 220), lambda: change_volume(-0.1))
 
     madeFirst = False
 
@@ -177,13 +177,19 @@ def GameThread():
             rectBucket1.center = (posx1, posy1)
             outline_rect1 = rectBucket1.inflate(10, 10)
             pygame.draw.ellipse(screen, (0, 100, 255), outline_rect1)
-            screen.blit(bucket1_img, rectBucket1)
+            rotated_bucket1 = pygame.transform.rotate(bucket1_img, bucket_angle1)
+            new_rect1 = rotated_bucket1.get_rect(center=rectBucket1.center)
+            screen.blit(rotated_bucket1, new_rect1)
+
 
             if num_players == 2:
                 rectBucket2.center = (posx2, posy2)
                 outline_rect2 = rectBucket2.inflate(10, 10)
                 pygame.draw.ellipse(screen, (255, 140, 0), outline_rect2)
-                screen.blit(bucket2_img, rectBucket2)
+                rotated_bucket2 = pygame.transform.rotate(bucket2_img, bucket_angle2)
+                new_rect2 = rotated_bucket2.get_rect(center=rectBucket2.center)
+                screen.blit(rotated_bucket2, new_rect2)
+
 
             pygame.draw.rect(screen, (0, 0, 0), rectFloor)
 
@@ -222,8 +228,8 @@ def GameThread():
 
                 if pygame.time.get_ticks() - speedup > 10000 and startGame:
                     speedup = pygame.time.get_ticks()
-                    initSpeed += 0.1
-                    bucketSpeed += 3
+                    initSpeed += 0.2
+                    bucketSpeed += .8
 
                 score_surface = small_font.render(f"Score: {currentScore}", True, (255, 255, 255))
                 level_surface = small_font.render(f"Level: {levelCount}", True, (255, 255, 255))
