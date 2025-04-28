@@ -73,7 +73,7 @@ def client_program():
             if movement_keys:
                 client_socket.send(''.join(movement_keys).encode())
 
-            time.sleep(0.01)
+            time.sleep(0.001)
 
     except KeyboardInterrupt:
         print("Disconnecting...")
