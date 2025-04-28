@@ -8,7 +8,7 @@ import os
 
 posx1, posy1 = 275, 520
 posx2, posy2 = 275, 100
-bucketSpeed = 10
+bucketSpeed = 100
 bucketSize = 60
 screen_width = 650
 screen_height = 800
