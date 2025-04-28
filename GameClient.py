@@ -8,7 +8,7 @@ def client_program():
     print("2 - Player 2 (Arrow Keys)")
     choice = input("Enter 1 or 2: ")
 
-    host = "192.168.1.164" 
+    host = "10.22.9.83" 
     port = 5000 if choice == "1" else 5001
 
     client_socket = socket.socket()

@@ -249,6 +249,7 @@ def ServerThread(player_num):
     s.connect(("8.8.8.8", 80))
     host = s.getsockname()[0]
     s.close()
+    print(f"Server started! Connect to IP address: {host}")
 
     port = 5000 + (player_num - 1)
     server_socket = socket.socket()
